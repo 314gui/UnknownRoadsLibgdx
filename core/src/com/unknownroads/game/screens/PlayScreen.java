@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.unknownroads.game.tools.MapLoader;
 
@@ -30,7 +30,7 @@ public class PlayScreen implements Screen {
     private static final int TURN_DIRECTION_LEFT = 1;
     private static final int TURN_DIRECTION_RIGHT = 2;
 
-    private static final float DRIFT = 0.4f;
+    private static final float DRIFT = 0.0f;
     private static final float TURN_SPEED = 2.0f;
     private static final float DRIVE_SPEED = 120.0f;
     private static final float MAX_SPEED = 35.0f;
@@ -52,7 +52,7 @@ public class PlayScreen implements Screen {
         mB2dr = new Box2DDebugRenderer();
         mCamera= new OrthographicCamera();
         mCamera.zoom = DEFAULT_ZOOM;
-        mViewport = new FitViewport(640 / PPM, 480 / PPM, mCamera);
+        mViewport = new StretchViewport(640 / PPM, 480 / PPM, mCamera);
         mMapLoader = new MapLoader(mWorld);
         mPlayer = mMapLoader.getPlayer();
 
@@ -133,17 +133,20 @@ public class PlayScreen implements Screen {
     }
 
     private void handleInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)){
+        float accelZ = Gdx.input.getAccelerometerZ();
+        float accelY = Gdx.input.getAccelerometerY();
+
+        if (accelZ> 6.0f){
             mDriveDirection = DRIVE_DIRECTION_FORWARD;
-        }else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+        }else if (accelZ< -1.0f){
             mDriveDirection = DRIVE_DIRECTION_BACKWARD;
         }else {
             mDriveDirection = DRIVE_DIRECTION_NONE;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        if (accelY < -2.0f){
             mTurnDirection = TURN_DIRECTION_LEFT;
-        }else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        }else if (accelY >  2.0f){
             mTurnDirection = TURN_DIRECTION_RIGHT;
         }else {
             mTurnDirection = TURN_DIRECTION_NONE;
