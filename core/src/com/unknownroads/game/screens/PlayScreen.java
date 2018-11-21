@@ -76,7 +76,6 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
         //TODO pedreiro codigo repetido
         switch (Gdx.app.getType()) {
             case Android:
@@ -87,13 +86,11 @@ public class PlayScreen implements Screen {
                 break;
         }
 
-
         update(delta);
 
         handleAudio();
 
         draw();
-
 
         //TODO check renderer options
         //Draws audio lines
@@ -102,7 +99,6 @@ public class PlayScreen implements Screen {
         sr.line(rayOrigin, rayLeft);
         sr.line(rayOrigin, rayRight);
         sr.end();
-
 
     }
 
@@ -135,11 +131,11 @@ public class PlayScreen implements Screen {
 
         //TODO check placement of rayCast related code
         if(rayLeftCallback.hitPos != null) {
-            sr.line(rayLeftCallback.hitPos, mPlayer.getmBody().getLocalPoint(rayLeftCallback.hitNormal));
+            sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
             //System.out.println("left: " + rayLeftCallback.hitPos.dst(mPlayer.getmBody().getPosition()));
         }
         if(rayRightCallback.hitPos != null) {
-            sr.line(rayRightCallback.hitPos, mPlayer.getmBody().getLocalPoint(rayRightCallback.hitNormal));
+            sr.line(rayRightCallback.hitPos, new Vector2(rayRightCallback.hitNormal).add(rayRightCallback.hitPos));
             //System.out.println("right: " + rayRightCallback.hitPos.dst(mPlayer.getmBody().getPosition()));
         }
 
