@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -46,6 +47,12 @@ public class PlayScreen implements Screen {
     private int mDriveDirection = DRIVE_DIRECTION_NONE;
     private int mTurnDirection = TURN_DIRECTION_NONE;
 
+    //TODO raycasting, current lines are visualizations
+    private Vector2 rayOrigin;
+    private Vector2 rayLeft;
+    private Vector2 rayRight;
+    private ShapeRenderer sr;
+
     public PlayScreen(){
         mBatch = new SpriteBatch();
         mWorld = new World(GRAVITY, true);
@@ -55,8 +62,12 @@ public class PlayScreen implements Screen {
         mViewport = new StretchViewport(640 / PPM, 480 / PPM, mCamera);
         mMapLoader = new MapLoader(mWorld);
         mPlayer = mMapLoader.getPlayer();
-
         mPlayer.setLinearDamping(0.5f);
+
+        sr = new ShapeRenderer();
+        rayLeft = new Vector2(0, 0);
+        rayRight = new Vector2(0, 0);
+
     }
 
     @Override
@@ -70,13 +81,49 @@ public class PlayScreen implements Screen {
 
         Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        handleInput();
+
+        handleAudio();
+
+        //TODO pedreiro codigo repetido
+        switch (Gdx.app.getType()) {
+            case Android:
+                handleInputAndroid();
+                break;
+            case Desktop:
+                handleInputDesktop();
+                break;
+        }
+
         processInput();
         update(delta);
         handleDrift();
 
         draw();
 
+        //TODO check renderer options
+        //Draws audio lines
+        sr.setProjectionMatrix(mCamera.combined);
+        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.line(rayOrigin, rayLeft);
+        sr.line(rayOrigin, rayRight);
+        sr.end();
+
+    }
+
+    private void handleAudio() {
+
+        //TODO mudar origem p nose
+        rayOrigin = mPlayer.getPosition();
+
+        //TODO mudar para arcos....
+        //Fetches the point 15m to the left and right of rayOrigin, rotated according to 'mPlayer.getAngle()'
+        float leftX = (float) ((15) * Math.cos(mPlayer.getAngle()) + rayOrigin.x);
+        float leftY = (float) ((15) * Math.sin(mPlayer.getAngle()) + rayOrigin.y);
+        float rightX = (float) ((-15) * Math.cos(mPlayer.getAngle()) + rayOrigin.x);
+        float rightY = (float) ((-15) * Math.sin(mPlayer.getAngle()) + rayOrigin.y);
+
+        rayLeft.set(leftX, leftY);
+        rayRight.set(rightX, rightY);
 
     }
 
@@ -132,7 +179,29 @@ public class PlayScreen implements Screen {
         return new Vector2(a * v.x, a* v.y);
     }
 
-    private void handleInput() {
+    private void handleInputDesktop() {
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            mDriveDirection = DRIVE_DIRECTION_FORWARD;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            mDriveDirection = DRIVE_DIRECTION_BACKWARD;
+        } else {
+            mDriveDirection = DRIVE_DIRECTION_NONE;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            mTurnDirection = TURN_DIRECTION_LEFT;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            mTurnDirection = TURN_DIRECTION_RIGHT;
+        } else {
+            mTurnDirection = TURN_DIRECTION_NONE;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit();
+        }
+
+    }
+
+    private void handleInputAndroid() {
         float accelZ = Gdx.input.getAccelerometerZ();
         float accelY = Gdx.input.getAccelerometerY();
 
@@ -199,6 +268,8 @@ public class PlayScreen implements Screen {
         mWorld.dispose();
         mB2dr.dispose();
         mMapLoader.dispose();
+
+        sr.dispose();
 
     }
 }
