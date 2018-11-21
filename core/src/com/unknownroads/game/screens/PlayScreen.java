@@ -8,44 +8,31 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.unknownroads.game.entities.Car;
 import com.unknownroads.game.tools.MapLoader;
 
-import static com.unknownroads.game.Constants.DEFAULT_ZOOM;
-import static com.unknownroads.game.Constants.GRAVITY;
-import static com.unknownroads.game.Constants.PPM;
+import static com.unknownroads.game.Constants.*;
+import static com.unknownroads.game.entities.Car.*;
 
 
 
 public class PlayScreen implements Screen {
 
-    private static final int DRIVE_DIRECTION_NONE = 0;
-    private static final int DRIVE_DIRECTION_FORWARD = 1;
-    private static final int DRIVE_DIRECTION_BACKWARD = 2;
 
-    private static final int TURN_DIRECTION_NONE = 0;
-    private static final int TURN_DIRECTION_LEFT = 1;
-    private static final int TURN_DIRECTION_RIGHT = 2;
-
-    private static final float DRIFT = 0.0f;
-    private static final float TURN_SPEED = 2.0f;
-    private static final float DRIVE_SPEED = 120.0f;
-    private static final float MAX_SPEED = 35.0f;
 
     private final SpriteBatch mBatch;
     private final World mWorld;
     private final Box2DDebugRenderer mB2dr;
     private final OrthographicCamera mCamera;
     private final Viewport mViewport;
-    private final Body mPlayer;
+    private final Car mPlayer;
     private final MapLoader mMapLoader;
 
-    private int mDriveDirection = DRIVE_DIRECTION_NONE;
-    private int mTurnDirection = TURN_DIRECTION_NONE;
+
 
     //TODO raycasting, current lines are visualizations
     private Vector2 rayOrigin;
@@ -61,8 +48,8 @@ public class PlayScreen implements Screen {
         mCamera.zoom = DEFAULT_ZOOM;
         mViewport = new StretchViewport(640 / PPM, 480 / PPM, mCamera);
         mMapLoader = new MapLoader(mWorld);
-        mPlayer = mMapLoader.getPlayer();
-        mPlayer.setLinearDamping(0.5f);
+        mPlayer = new Car(35.0f, 0.8f, 30.0f, mMapLoader, Car.DRIVE_2WD, mWorld);
+
 
         sr = new ShapeRenderer();
         rayLeft = new Vector2(0, 0);
@@ -82,7 +69,7 @@ public class PlayScreen implements Screen {
         Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        handleAudio();
+        //handleAudio();
 
         //TODO pedreiro codigo repetido
         switch (Gdx.app.getType()) {
@@ -94,12 +81,13 @@ public class PlayScreen implements Screen {
                 break;
         }
 
-        processInput();
+
         update(delta);
-        handleDrift();
+
 
         draw();
 
+        /*
         //TODO check renderer options
         //Draws audio lines
         sr.setProjectionMatrix(mCamera.combined);
@@ -107,9 +95,11 @@ public class PlayScreen implements Screen {
         sr.line(rayOrigin, rayLeft);
         sr.line(rayOrigin, rayRight);
         sr.end();
+        */
 
     }
 
+    /*
     private void handleAudio() {
 
         //TODO mudar origem p nose
@@ -117,7 +107,7 @@ public class PlayScreen implements Screen {
 
         //TODO mudar para arcos....
         //Fetches the point 15m to the left and right of rayOrigin, rotated according to 'mPlayer.getAngle()'
-        float leftX = (float) ((15) * Math.cos(mPlayer.getAngle()) + rayOrigin.x);
+        float leftX = (float) ((15) * Math.cos(45));
         float leftY = (float) ((15) * Math.sin(mPlayer.getAngle()) + rayOrigin.y);
         float rightX = (float) ((-15) * Math.cos(mPlayer.getAngle()) + rayOrigin.x);
         float rightY = (float) ((-15) * Math.sin(mPlayer.getAngle()) + rayOrigin.y);
@@ -126,74 +116,29 @@ public class PlayScreen implements Screen {
         rayRight.set(rightX, rightY);
 
     }
-
-    private void handleDrift() {
-        Vector2 forwardSpeed = getForwardVelocity();
-        Vector2 lateralSpeed = getLateralVelocity();
-        mPlayer.setLinearVelocity(forwardSpeed.x + lateralSpeed.x * DRIFT, forwardSpeed.y + lateralSpeed.y * DRIFT );
-    }
-
-    private void processInput() {
-        Vector2 baseVector = new Vector2(0, 0);
-
-        if (mTurnDirection == TURN_DIRECTION_RIGHT){
-            mPlayer.setAngularVelocity(-TURN_SPEED);
-
-        }else if (mTurnDirection == TURN_DIRECTION_LEFT){
-            mPlayer.setAngularVelocity(TURN_SPEED);
-
-        }else if (mTurnDirection == TURN_DIRECTION_NONE && mPlayer.getAngularVelocity() != 0){
-            mPlayer.setAngularVelocity(0.0f);
-        }
-
-        if (mDriveDirection == DRIVE_DIRECTION_FORWARD){
-            baseVector.set(0, DRIVE_SPEED);
-
-        } else if (mDriveDirection == DRIVE_DIRECTION_BACKWARD){
-            baseVector.set(0, -DRIVE_SPEED);
-
-        }
-
-        if (!baseVector.isZero() && mPlayer.getLinearVelocity().len() < MAX_SPEED){
-            mPlayer.applyForceToCenter(mPlayer.getWorldVector(baseVector), true);
-        }
-    }
-
-    private Vector2 getForwardVelocity(){
-        Vector2 currentNormal = mPlayer.getWorldVector(new Vector2(0, 1));
-        float dotProduct = currentNormal.dot(mPlayer.getLinearVelocity());
-        return multiply(dotProduct, currentNormal);
-
-    }
-
-    private Vector2 getLateralVelocity(){
-        Vector2 currentNormal = mPlayer.getWorldVector(new Vector2(1, 0));
-        float dotProduct = currentNormal.dot(mPlayer.getLinearVelocity());
-        return multiply(dotProduct, currentNormal);
-
-    }
+*/
 
 
 
-    private Vector2 multiply(float a, Vector2 v){
-        return new Vector2(a * v.x, a* v.y);
-    }
 
     private void handleInputDesktop() {
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            mDriveDirection = DRIVE_DIRECTION_FORWARD;
+            mPlayer.setmDriveDirection(DRIVE_DIRECTION_FORWARD);
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            mDriveDirection = DRIVE_DIRECTION_BACKWARD;
+
+            mPlayer.setmDriveDirection(DRIVE_DIRECTION_BACKWARD);
         } else {
-            mDriveDirection = DRIVE_DIRECTION_NONE;
+
+            mPlayer.setmDriveDirection(DRIVE_DIRECTION_NONE);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            mTurnDirection = TURN_DIRECTION_LEFT;
+
+            mPlayer.setmTurnDirection(TURN_DIRECTION_LEFT);
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            mTurnDirection = TURN_DIRECTION_RIGHT;
+            mPlayer.setmTurnDirection(TURN_DIRECTION_RIGHT);
         } else {
-            mTurnDirection = TURN_DIRECTION_NONE;
+            mPlayer.setmTurnDirection(TURN_DIRECTION_NONE);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
@@ -206,19 +151,19 @@ public class PlayScreen implements Screen {
         float accelY = Gdx.input.getAccelerometerY();
 
         if (accelZ> 6.0f){
-            mDriveDirection = DRIVE_DIRECTION_FORWARD;
+            mPlayer.setmDriveDirection(DRIVE_DIRECTION_FORWARD);
         }else if (accelZ< -1.0f){
-            mDriveDirection = DRIVE_DIRECTION_BACKWARD;
+            mPlayer.setmDriveDirection(DRIVE_DIRECTION_BACKWARD);
         }else {
-            mDriveDirection = DRIVE_DIRECTION_NONE;
+            mPlayer.setmDriveDirection(DRIVE_DIRECTION_NONE);
         }
 
         if (accelY < -2.0f){
-            mTurnDirection = TURN_DIRECTION_LEFT;
+            mPlayer.setmTurnDirection(TURN_DIRECTION_LEFT);
         }else if (accelY >  2.0f){
-            mTurnDirection = TURN_DIRECTION_RIGHT;
+            mPlayer.setmTurnDirection(TURN_DIRECTION_RIGHT);
         }else {
-            mTurnDirection = TURN_DIRECTION_NONE;
+            mPlayer.setmTurnDirection(TURN_DIRECTION_NONE);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
@@ -234,9 +179,9 @@ public class PlayScreen implements Screen {
 
 
     private void update(final float delta) {
-        mCamera.position.set(mPlayer.getPosition(), 0);
+        mPlayer.update(delta);
+        mCamera.position.set(mPlayer.getmBody().getPosition(), 0);
         mCamera.update();
-
         mWorld.step(delta, 6, 2);
 
     }
