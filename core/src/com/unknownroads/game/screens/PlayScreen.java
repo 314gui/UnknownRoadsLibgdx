@@ -3,6 +3,7 @@ package com.unknownroads.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,6 +45,10 @@ public class PlayScreen implements Screen {
     private MyRayCastCallback rayLeftCallback;
     private MyRayCastCallback rayRightCallback;
 
+    //TODO create audio manager?
+    private Sound sound;
+    private long soundId;
+
 
     public PlayScreen(){
         mBatch = new SpriteBatch();
@@ -53,7 +58,7 @@ public class PlayScreen implements Screen {
         mCamera.zoom = DEFAULT_ZOOM;
         mViewport = new StretchViewport(640 / PPM, 480 / PPM, mCamera);
         mMapLoader = new MapLoader(mWorld);
-        mPlayer = new Car(120.0f, 0.0f, 30.0f, mMapLoader, Car.DRIVE_2WD, mWorld);
+        mPlayer = new Car(120.0f, 0.5f, 30.0f, mMapLoader, Car.DRIVE_2WD, mWorld);
 
 
         sr = new ShapeRenderer();
@@ -61,6 +66,10 @@ public class PlayScreen implements Screen {
         rayRight = new Vector2(0, 0);
         rayLeftCallback = new MyRayCastCallback();
         rayRightCallback = new MyRayCastCallback();
+
+        sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
+        soundId = sound.play(1.0f);
+        sound.setLooping(soundId,true);
 
     }
 
@@ -98,6 +107,7 @@ public class PlayScreen implements Screen {
         sr.begin(ShapeRenderer.ShapeType.Line);
         sr.line(rayOrigin, rayLeft);
         sr.line(rayOrigin, rayRight);
+
         sr.end();
 
     }
@@ -129,6 +139,7 @@ public class PlayScreen implements Screen {
         mWorld.rayCast(rayLeftCallback,rayOrigin,rayLeft);
         mWorld.rayCast(rayRightCallback, rayOrigin, rayRight);
 
+
         //TODO check placement of rayCast related code
         if(rayLeftCallback.hitPos != null) {
             sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
@@ -140,6 +151,33 @@ public class PlayScreen implements Screen {
         }
 
         sr.end();
+
+        float panValue = 0;
+        if(rayLeftCallback.hitPos != null && rayRightCallback.hitPos != null) {
+            float distl = rayLeftCallback.hitPos.dst(mPlayer.getmBody().getPosition());
+            float distr = rayRightCallback.hitPos.dst(mPlayer.getmBody().getPosition());
+
+            if (distl >= 15)
+                panValue = -1;
+            else if (distr >= 15)
+                panValue = 1;
+            else {
+                //panValue = distl + distr - 18; //TODO mudar valores (distl/distr-1)
+                panValue = distl/distr - 1;
+                System.out.println("r: " + distl);
+                System.out.println("l " + distr);
+                System.out.println("pan " + panValue);
+                System.out.println("Acceleration "+ mPlayer.getmAcceleration());
+
+            }
+
+
+        }
+
+
+        float linVelocity = mPlayer.getmBody().linVelLoc.len();
+        sound.setPan(soundId, panValue ,linVelocity/100);
+        sound.setPitch(soundId, linVelocity/40);
 
         //TODO edge case: both raycasts have no hit
 
@@ -242,6 +280,8 @@ public class PlayScreen implements Screen {
         mMapLoader.dispose();
 
         sr.dispose();
+
+        sound.dispose();
 
     }
 }

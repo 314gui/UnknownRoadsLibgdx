@@ -118,6 +118,11 @@ public class Car extends BodyHolder {
     }
 
 
+
+
+
+
+
     private void processInput() {
         Vector2 baseVector = new Vector2(0, 0);
 
@@ -177,6 +182,7 @@ public class Car extends BodyHolder {
 
     }
 
+    public float getmAcceleration(){return this.mAcceleration;}
     public void setmDriveDirection(int driveDirection) {
         this.mDriveDirection = driveDirection;
     }
