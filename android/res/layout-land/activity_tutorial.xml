@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".TutorialActivity"
+    android:background="@drawable/bgroad1_nosplit">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/list_item3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/bangers"
+            android:text="Tutorial"
+            android:textAlignment="center"
+            android:layout_marginLeft="200dp"
+            android:textColor="@android:color/white"
+            android:textSize="50sp" />
+
+        <ImageView
+            android:id="@+id/imageView11"
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/megaphone" />/>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="195dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="169dp"
+                android:layout_height="211dp"
+                android:layout_marginLeft="20dp"
+                android:rotation="-25"
+                app:srcCompat="@drawable/rotate" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="213dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="match_parent"
+                android:layout_height="169dp"
+                android:layout_marginTop="20dp"
+                app:srcCompat="@drawable/rotate" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:fontFamily="@font/bangers"
+                android:text="Press 5 seconds to skip"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView7"
+                android:layout_width="169dp"
+                android:layout_height="211dp"
+                android:layout_marginRight="20dp"
+                android:rotation="25"
+                app:srcCompat="@drawable/rotate" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
