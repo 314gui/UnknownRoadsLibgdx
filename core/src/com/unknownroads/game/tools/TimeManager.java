@@ -1,5 +1,8 @@
 package com.unknownroads.game.tools;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 import java.util.ArrayList;
 
 public class TimeManager {
@@ -20,28 +23,29 @@ public class TimeManager {
         if(lapTime != -1)
             timesList.add(lapTime);
 
-        if(timesList.size() > 0 && lapTime > timesList.get(bestTimeIndex)) {
+        if(timesList.size() > 0 && lapTime < timesList.get(bestTimeIndex)) {
             bestTimeIndex = timesList.size() - 1;
         }
 
-        System.out.println("New time" + lapTime);
+        for(float f : timesList)
+            System.out.print(f + "|");
+        System.out.println("best index" + bestTimeIndex);
+
         lapTime = 0;
 
     }
 
     public void update(float delta){
         this.lapTime += delta;
-        System.out.println(this.lapTime);
     }
 
     public float getLapTime(){
         return this.lapTime;
     }
 
-    public void display(){
-
-
-
+    public float getBestLap(){
+        return timesList.size() > 0 ? timesList.get(bestTimeIndex):-1;
     }
+
 
 }

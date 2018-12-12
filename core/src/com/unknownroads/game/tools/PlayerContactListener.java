@@ -19,11 +19,8 @@ public class PlayerContactListener implements ContactListener {
         String nameA = (String) contact.getFixtureA().getBody().getUserData();
         String nameB = (String) contact.getFixtureB().getBody().getUserData();
 
-        System.out.println(tm.getLapTime());
-
-        if(nameA == "goal" || nameB =="goal")
+        if((nameA == "goal" || nameB =="goal") && (nameA == "player" ||nameB == "player") )
             tm.newLap();
-
 
     }
 

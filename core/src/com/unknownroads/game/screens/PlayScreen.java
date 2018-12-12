@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.unknownroads.game.HUD;
 import com.unknownroads.game.entities.Car;
 import com.unknownroads.game.tools.MapLoader;
 import com.unknownroads.game.tools.MyRayCastCallback;
@@ -53,6 +54,7 @@ public class PlayScreen implements Screen {
 
     private TimeManager tm;
 
+    private HUD hud;
 
     public PlayScreen(){
         mBatch = new SpriteBatch();
@@ -78,6 +80,8 @@ public class PlayScreen implements Screen {
         tm = new TimeManager();
         mWorld.setContactListener(new PlayerContactListener(tm));
 
+        hud = new HUD(tm);
+
     }
 
     @Override
@@ -102,24 +106,18 @@ public class PlayScreen implements Screen {
                 break;
         }
 
+
         update(delta);
 
         handleAudio();
+
+        hud.render();
 
         if(tm.getLapTime() != -1) {
             tm.update(delta);
         }
 
         draw();
-
-        //TODO check renderer options
-        //Draws audio lines
-        sr.setProjectionMatrix(mCamera.combined);
-        sr.begin(ShapeRenderer.ShapeType.Line);
-        sr.line(rayOrigin, rayLeft);
-        sr.line(rayOrigin, rayRight);
-
-        sr.end();
 
     }
 
@@ -193,10 +191,6 @@ public class PlayScreen implements Screen {
 
     }
 
-
-
-
-
     private void handleInputDesktop() {
 
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
@@ -251,6 +245,16 @@ public class PlayScreen implements Screen {
     private void draw(){
         mBatch.setProjectionMatrix(mCamera.combined);
         mB2dr.render(mWorld, mCamera.combined);
+
+        //TODO check renderer options
+        //Draws audio lines
+        sr.setProjectionMatrix(mCamera.combined);
+        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.line(rayOrigin, rayLeft);
+        sr.line(rayOrigin, rayRight);
+
+        sr.end();
+
     }
 
 
@@ -264,7 +268,6 @@ public class PlayScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         mViewport.update(width, height);
-
     }
 
     @Override
@@ -292,6 +295,8 @@ public class PlayScreen implements Screen {
         sr.dispose();
 
         sound.dispose();
+
+        hud.dispose();
 
     }
 }
