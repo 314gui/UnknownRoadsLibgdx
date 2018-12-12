@@ -9,11 +9,13 @@ public class ShapeFactory {
 
     private  ShapeFactory(){}
 
-    public static Body createRectangle(final Vector2 position, final Vector2 size, final BodyDef.BodyType type, final World world, float density, boolean sensor) {
+    public static Body createRectangle(final Vector2 position, final Vector2 size, final BodyDef.BodyType type, final World world, float density, boolean sensor, String userdata) {
         final BodyDef bdef = new BodyDef();
         bdef.position.set(position.x / PPM, position.y /PPM);
         bdef.type = type;
+
         final Body body = world.createBody(bdef);
+        body.setUserData(userdata);
 
         //define fixture
         final PolygonShape shape = new PolygonShape();
@@ -22,7 +24,6 @@ public class ShapeFactory {
         fdef.shape= shape;
         fdef.density = density;
         fdef.isSensor = sensor;
-
         body.createFixture(fdef);
         shape.dispose();
 

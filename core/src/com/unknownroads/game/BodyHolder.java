@@ -22,11 +22,10 @@ public abstract class BodyHolder {
 
     public BodyHolder(final Body nBody) {
         this.mBody = nBody;
-
     }
 
-    public BodyHolder(final Vector2 position, final Vector2 size, final BodyDef.BodyType type, final World world, float density, boolean sensor) {
-        mBody = ShapeFactory.createRectangle(position, size, type, world, density, sensor);
+    public BodyHolder(final Vector2 position, final Vector2 size, final BodyDef.BodyType type, final World world, float density, boolean sensor, String userdata) {
+        mBody = ShapeFactory.createRectangle(position, size, type, world, density, sensor, userdata);
     }
 
     public void update(final float delta) {

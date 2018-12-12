@@ -34,7 +34,7 @@ public class MapLoader implements Disposable {
             ShapeFactory.createRectangle(
                     new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2 ), //position
                     new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), //size
-                    BodyDef.BodyType.StaticBody, mWorld, 1f, false);
+                    BodyDef.BodyType.StaticBody, mWorld, 1f, false, "wall");
 
         }
 
@@ -48,7 +48,7 @@ public class MapLoader implements Disposable {
         return ShapeFactory.createRectangle(
                 new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2 ), //position
                 new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), //size
-                BodyDef.BodyType.DynamicBody, mWorld, 0.4f, false);
+                BodyDef.BodyType.DynamicBody, mWorld, 0.4f, false, "player");
     }
 
 
@@ -57,7 +57,7 @@ public class MapLoader implements Disposable {
         return ShapeFactory.createRectangle(
                 new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2 ), //position
                 new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), //size
-                BodyDef.BodyType.StaticBody, mWorld, 0.4f, true);
+                BodyDef.BodyType.StaticBody, mWorld, 0.4f, true, "goal");
     }
 
     @Override

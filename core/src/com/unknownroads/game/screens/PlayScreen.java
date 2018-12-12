@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.unknownroads.game.entities.Car;
 import com.unknownroads.game.tools.MapLoader;
 import com.unknownroads.game.tools.MyRayCastCallback;
+import com.unknownroads.game.tools.PlayerContactListener;
+import com.unknownroads.game.tools.TimeManager;
 
 import static com.unknownroads.game.Constants.*;
 import static com.unknownroads.game.entities.Car.*;
@@ -49,6 +51,8 @@ public class PlayScreen implements Screen {
     private Sound sound;
     private long soundId;
 
+    private TimeManager tm;
+
 
     public PlayScreen(){
         mBatch = new SpriteBatch();
@@ -70,6 +74,9 @@ public class PlayScreen implements Screen {
         sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
         soundId = sound.play(1.0f);
         sound.setLooping(soundId,true);
+
+        tm = new TimeManager();
+        mWorld.setContactListener(new PlayerContactListener(tm));
 
     }
 
@@ -98,6 +105,10 @@ public class PlayScreen implements Screen {
         update(delta);
 
         handleAudio();
+
+        if(tm.getLapTime() != -1) {
+            tm.update(delta);
+        }
 
         draw();
 
@@ -162,12 +173,11 @@ public class PlayScreen implements Screen {
             else if (distr >= 15)
                 panValue = 1;
             else {
-                //panValue = distl + distr - 18; //TODO mudar valores (distl/distr-1)
-                panValue = distl/distr - 1;
-                System.out.println("r: " + distl);
-                System.out.println("l " + distr);
-                System.out.println("pan " + panValue);
-                System.out.println("Acceleration "+ mPlayer.getmAcceleration());
+                panValue = distl/distr - 1; //TODO mudar valores (distl/distr-1) melhorar panValue
+                //System.out.println("r: " + distl);
+               //System.out.println("l " + distr);
+                //System.out.println("pan " + panValue);
+                //System.out.println("Acceleration "+ mPlayer.getmAcceleration());
 
             }
 
