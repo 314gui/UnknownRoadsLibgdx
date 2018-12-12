@@ -17,6 +17,7 @@ public class MapLoader implements Disposable {
 
     private static final String MAP_WALL = "wall";
     private static final String MAP_PLAYER = "player";
+    private static final String MAP_GOAL = "goal";
 
     private final World mWorld;
     private final TiledMap mMap;
@@ -36,6 +37,10 @@ public class MapLoader implements Disposable {
                     BodyDef.BodyType.StaticBody, mWorld, 1f, false);
 
         }
+
+        //TODO iniciar goal onde?
+        getGoal();
+
     }
 
     public Body getPlayer(){
@@ -44,6 +49,15 @@ public class MapLoader implements Disposable {
                 new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2 ), //position
                 new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), //size
                 BodyDef.BodyType.DynamicBody, mWorld, 0.4f, false);
+    }
+
+
+    public Body getGoal(){
+        final Rectangle rectangle = mMap.getLayers().get(MAP_GOAL).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();
+        return ShapeFactory.createRectangle(
+                new Vector2(rectangle.getX() + rectangle.getWidth() / 2, rectangle.getY() + rectangle.getHeight() / 2 ), //position
+                new Vector2(rectangle.getWidth() / 2, rectangle.getHeight() / 2), //size
+                BodyDef.BodyType.StaticBody, mWorld, 0.4f, true);
     }
 
     @Override
