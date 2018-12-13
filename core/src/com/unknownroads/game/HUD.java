@@ -1,14 +1,11 @@
 package com.unknownroads.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.unknownroads.game.tools.TimeManager;
 
 public class HUD implements Disposable {
@@ -17,6 +14,22 @@ public class HUD implements Disposable {
     private SpriteBatch batch;
     private OrthographicCamera cam;
     private TimeManager tm;
+    private Preferences prefs;
+
+    /*
+    DEVIA DAR OVERRIDE PARA AMBOS FAZEREM O MESMO
+
+
+     @Override
+     	public Preferences getPreferences (String name) {
+     		return new AndroidPreferences(getSharedPreferences(name, Context.MODE_PRIVATE));
+     	}
+
+       @Override
+       public int getInteger (String key) {
+           return sharedPrefs.getInt(key, 0);
+           }
+     */
 
     public HUD(TimeManager tm) {
 
@@ -24,6 +37,7 @@ public class HUD implements Disposable {
         cam = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         font = new BitmapFont(Gdx.files.internal("comicsans.fnt"));
         this.tm = tm;
+        this.prefs = Gdx.app.getPreferences("unknownroads.preferences");
 
     }
 
@@ -44,8 +58,13 @@ public class HUD implements Disposable {
         else
             font.draw(batch, "Time: --", 3, Gdx.graphics.getHeight() - 3);
 
-        if(tm.getBestLap() != -1)
+        if (tm.getBestLap() != -1) {
             font.draw(batch, "PB: " + tm.getBestLap(), 3, Gdx.graphics.getHeight() - 20);
+            prefs.putFloat("bestLap", tm.getBestLap());
+            prefs.flush();
+
+        }
+
 
         batch.end();
 
