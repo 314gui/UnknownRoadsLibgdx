@@ -27,8 +27,6 @@ import static com.unknownroads.game.entities.Car.*;
 
 public class PlayScreen implements Screen {
 
-
-
     private final SpriteBatch mBatch;
     private final World mWorld;
     private final Box2DDebugRenderer mB2dr;
@@ -37,8 +35,7 @@ public class PlayScreen implements Screen {
     private final Car mPlayer;
     private final MapLoader mMapLoader;
 
-
-
+    //rycast a frente do carro, avança/recua com velocidade
     //TODO raycasting, current lines are visualizations
     private Vector2 rayOrigin;
     private Vector2 rayLeft;
@@ -66,15 +63,15 @@ public class PlayScreen implements Screen {
         mMapLoader = new MapLoader(mWorld);
         mPlayer = new Car(120.0f, 0.5f, 30.0f, mMapLoader, Car.DRIVE_2WD, mWorld);
 
-
         sr = new ShapeRenderer();
+        rayOrigin = new Vector2(0, 0);
         rayLeft = new Vector2(0, 0);
         rayRight = new Vector2(0, 0);
         rayLeftCallback = new MyRayCastCallback();
         rayRightCallback = new MyRayCastCallback();
 
         sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
-        soundId = sound.play(1.0f);
+        soundId = sound.play(0.0f);
         sound.setLooping(soundId,true);
 
         tm = new TimeManager();
@@ -124,15 +121,18 @@ public class PlayScreen implements Screen {
 
     private void handleAudio() {
 
+        double angle = mPlayer.getmBody().getAngle();
+        Vector2 pos = mPlayer.getmBody().getPosition();
+
         //TODO mudar origem p nose
-        rayOrigin = mPlayer.getmBody().getPosition();
+        rayOrigin.set( (float) (2.6f * Math.cos(angle+Math.PI/2) + pos.x) , (float) (2.6f * Math.sin(angle+Math.PI/2) + pos.y));
 
         //TODO mudar para arcos....
-        //Fetches the point 15m to the left and right of rayOrigin, rotated according to 'mPlayer.getAngle()'
-        float leftX = (float) ((20) * Math.cos(mPlayer.getmBody().getAngle()) + rayOrigin.x);
-        float leftY = (float) ((20) * Math.sin(mPlayer.getmBody().getAngle()) + rayOrigin.y);
-        float rightX = (float) ((-20) * Math.cos(mPlayer.getmBody().getAngle()) + rayOrigin.x);
-        float rightY = (float) ((-20) * Math.sin(mPlayer.getmBody().getAngle()) + rayOrigin.y);
+        //Fetches the point RAYLEN to the left and right of rayOrigin, rotated according to 'mPlayer.getAngle()'
+        float leftX = (float) ((-RAY_LENGTH) * Math.cos(angle) + rayOrigin.x);
+        float leftY = (float) ((-RAY_LENGTH) * Math.sin(angle) + rayOrigin.y);
+        float rightX = (float) ((RAY_LENGTH) * Math.cos(angle) + rayOrigin.x);
+        float rightY = (float) ((RAY_LENGTH) * Math.sin(angle) + rayOrigin.y);
 
         rayLeft.set(leftX, leftY);
         rayRight.set(rightX, rightY);
@@ -141,6 +141,9 @@ public class PlayScreen implements Screen {
         //Draws audio lines
         sr.setProjectionMatrix(mCamera.combined);
         sr.begin(ShapeRenderer.ShapeType.Line);
+
+        sr.circle(pos.x,pos.y,1); //TODO debug
+
         sr.line(rayOrigin, rayLeft);
         sr.line(rayOrigin, rayRight);
 
@@ -152,7 +155,6 @@ public class PlayScreen implements Screen {
         //TODO check placement of rayCast related code
         if(rayLeftCallback.hitPos != null) {
             sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
-            //System.out.println("left: " + rayLeftCallback.hitPos.dst(mPlayer.getmBody().getPosition()));
         }
         if(rayRightCallback.hitPos != null) {
             sr.line(rayRightCallback.hitPos, new Vector2(rayRightCallback.hitNormal).add(rayRightCallback.hitPos));
@@ -166,26 +168,16 @@ public class PlayScreen implements Screen {
             float distl = rayLeftCallback.hitPos.dst(mPlayer.getmBody().getPosition());
             float distr = rayRightCallback.hitPos.dst(mPlayer.getmBody().getPosition());
 
-            if (distl >= 15)
-                panValue = -1;
-            else if (distr >= 15)
-                panValue = 1;
-            else {
-                panValue = distl/distr - 1; //TODO mudar valores (distl/distr-1) melhorar panValue
-                //System.out.println("r: " + distl);
-               //System.out.println("l " + distr);
-                //System.out.println("pan " + panValue);
-                //System.out.println("Acceleration "+ mPlayer.getmAcceleration());
 
-            }
+            panValue = distr/distl - 1; //TODO mudar valores (distl/distr-1) melhorar panValue
 
 
         }
 
 
         float linVelocity = mPlayer.getmBody().linVelLoc.len();
-        sound.setPan(soundId, panValue ,linVelocity/100);
-        sound.setPitch(soundId, linVelocity/40);
+        sound.setPan(soundId, panValue ,(20 + linVelocity)/120); //USE MAXSPEED IN PLAYSCREEN CONSTRUCTOR
+        sound.setPitch(soundId, (20 + linVelocity)/60);
 
         //TODO edge case: both raycasts have no hit
 
@@ -248,12 +240,12 @@ public class PlayScreen implements Screen {
 
         //TODO check renderer options
         //Draws audio lines
-        sr.setProjectionMatrix(mCamera.combined);
-        sr.begin(ShapeRenderer.ShapeType.Line);
-        sr.line(rayOrigin, rayLeft);
-        sr.line(rayOrigin, rayRight);
+        //sr.setProjectionMatrix(mCamera.combined);
+        //sr.begin(ShapeRenderer.ShapeType.Line);
+        //sr.line(rayOrigin, rayLeft);
+        //sr.line(rayOrigin, rayRight);
 
-        sr.end();
+        //sr.end();
 
     }
 
