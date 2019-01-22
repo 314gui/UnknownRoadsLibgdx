@@ -17,6 +17,7 @@ public class MyRayCastCallback implements RayCastCallback {
         this.hitFixture = fixture;
         this.hitPos = new Vector2(point);
         this.hitNormal = new  Vector2(normal);
+        this.finished = true;
 
         return 0;
     }

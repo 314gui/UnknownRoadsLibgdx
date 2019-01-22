@@ -33,8 +33,6 @@ public class PlayScreen implements Screen {
     private final Car mPlayer;
     private final MapLoader mMapLoader;
 
-    //rycast a frente do carro, avança/recua com velocidade
-    //TODO raycasting, current lines are visualizations
     private Vector2 rayOrigin;
     private Vector2 rayLeft;
     private Vector2 rayRight;
@@ -59,7 +57,7 @@ public class PlayScreen implements Screen {
         mCamera.zoom = DEFAULT_ZOOM;
         mViewport = new StretchViewport(640 / PPM, 480 / PPM, mCamera);
         mMapLoader = new MapLoader(mWorld);
-        mPlayer = new Car(120.0f, 0.5f, 30.0f, mMapLoader, Car.DRIVE_2WD, mWorld);
+        mPlayer = new Car(120.0f, 0.5f, 20.0f, mMapLoader, Car.DRIVE_2WD, mWorld); //TODO check speed
 
         sr = new ShapeRenderer();
         rayOrigin = new Vector2(0, 0);
@@ -68,6 +66,9 @@ public class PlayScreen implements Screen {
         rayLeftCallback = new MyRayCastCallback();
         rayRightCallback = new MyRayCastCallback();
 
+        //TODO working android sound
+        //TODO crossgoal sound
+        //TODO short raycast in front to warn of impending walls
         sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
         soundId = sound.play(0.0f);
         sound.setLooping(soundId,true);
@@ -114,32 +115,44 @@ public class PlayScreen implements Screen {
 
     }
 
+    //TODO raycasts collide w goal
     private void handleAudio() {
-        //TODO check no hit edge case
         double angle = mPlayer.getmBody().getAngle();
         Vector2 pos = mPlayer.getmBody().getPosition();
         rayOrigin.set( (float) (2.6f * Math.cos(angle+Math.PI/2) + pos.x) , (float) (2.6f * Math.sin(angle+Math.PI/2) + pos.y));
 
         int n = 0;
+        float cl = -1;
+        float cr = -1;
         sr.setProjectionMatrix(mCamera.combined);
         sr.begin(ShapeRenderer.ShapeType.Line);
         Vector2 prevL = rayOrigin.cpy();
         Vector2 prevR = rayOrigin.cpy();
-        while(n<8){
+        while(n<18){
 
-            float leftX = (float) ((RAY_LENGTH) * Math.cos(angle+Math.PI-1.22 + ((Math.PI/9)*n)) + prevL.x); //1.22rad = 70º
-            float leftY = (float) ((RAY_LENGTH) * Math.sin(angle+Math.PI-1.22 + ((Math.PI/9)*n)) + prevL.y); //ciclo Math.cos(angle+Math.PI-1.22 - 20(rad)*n)
-            float rightX = (float) ((RAY_LENGTH) * Math.cos(angle+1.22 - ((Math.PI/9)*n)) + prevR.x); //TODO mudar max angle rodas para 15 e angulo aqui p pi/2
-            float rightY = (float) ((RAY_LENGTH) * Math.sin(angle+1.22 - ((Math.PI/9)*n)) + prevR.y);
+            float leftX = (float) ((RAY_LENGTH) * Math.cos(angle+Math.PI-1.30 + ((Math.PI/12)*n)) + prevL.x); //1.30rad = 75º
+            float leftY = (float) ((RAY_LENGTH) * Math.sin(angle+Math.PI-1.30 + ((Math.PI/12)*n)) + prevL.y); //ciclo Math.cos(angle+Math.PI-1.30 + PI/12(rad)*n) 180-75+15*n
+            float rightX = (float) ((RAY_LENGTH) * Math.cos(angle+1.30 - ((Math.PI/12)*n)) + prevR.x);
+            float rightY = (float) ((RAY_LENGTH) * Math.sin(angle+1.30 - ((Math.PI/12)*n)) + prevR.y);
 
             rayLeft.set(leftX, leftY);
             rayRight.set(rightX, rightY);
 
-            sr.line(prevL, rayLeft);
-            sr.line(prevR, rayRight);
+            //sr.line(prevL, rayLeft);
+//            sr.line(prevR, rayRight);
 
             mWorld.rayCast(rayLeftCallback,prevL,rayLeft);
             mWorld.rayCast(rayRightCallback, prevR, rayRight);
+
+            if(rayLeftCallback.finished() && cl == -1){ //n-1 offset da diagonal do carro á parede
+                cl = (n-1)*RAY_LENGTH + rayLeftCallback.hitPos.dst(prevL);
+                sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
+            }
+
+            if(rayRightCallback.finished() && cr == -1){
+                cr = (n-1)*RAY_LENGTH + rayRightCallback.hitPos.dst(prevR);
+                sr.line(rayRightCallback.hitPos, new Vector2(rayRightCallback.hitNormal).add(rayRightCallback.hitPos));
+            }
 
             prevL = rayLeft.cpy();
             prevR = rayRight.cpy();
@@ -148,22 +161,14 @@ public class PlayScreen implements Screen {
 
         }
 
-        if(rayLeftCallback.hitPos != null) {
-            sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
-        }
-        if(rayRightCallback.hitPos != null) {
-            sr.line(rayRightCallback.hitPos, new Vector2(rayRightCallback.hitNormal).add(rayRightCallback.hitPos));
-        }
+        rayLeftCallback.setFinished(false);
+        rayRightCallback.setFinished(false);
 
         sr.end();
 
-        float panValue = 0;
-        if(rayLeftCallback.hitPos != null && rayRightCallback.hitPos != null) {
-            float distl = rayLeftCallback.hitPos.dst(mPlayer.getmBody().getPosition());
-            float distr = rayRightCallback.hitPos.dst(mPlayer.getmBody().getPosition());
-            panValue = distr/distl - 1; //TODO mudar valores (distl/distr-1) melhorar panValue
-        }
-
+        float panValue = (-cl/(cl+cr)) + (cr/(cl+cr));
+//        System.out.println("pan: " + panValue);
+        
         float linVelocity = mPlayer.getmBody().linVelLoc.len();
         sound.setPan(soundId, panValue ,(20 + linVelocity)/120); //USE MAXSPEED IN PLAYSCREEN CONSTRUCTOR
         sound.setPitch(soundId, (20 + linVelocity)/60);
@@ -221,19 +226,9 @@ public class PlayScreen implements Screen {
 
     }
 
-    private void draw(){
+    private void draw(){//TODO add sprites
         mBatch.setProjectionMatrix(mCamera.combined);
         mB2dr.render(mWorld, mCamera.combined);
-
-        //TODO check renderer options
-        //Draws audio lines
-        //sr.setProjectionMatrix(mCamera.combined);
-        //sr.begin(ShapeRenderer.ShapeType.Line);
-        //sr.line(rayOrigin, rayLeft);
-        //sr.line(rayOrigin, rayRight);
-
-        //sr.end();
-
     }
 
 

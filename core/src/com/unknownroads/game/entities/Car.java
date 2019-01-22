@@ -29,7 +29,7 @@ public class Car extends BodyHolder {
     private static final Vector2 WHEEL_SIZE = new Vector2(16, 32);
     private static final float LINEAR_DUMPING = 0.5f;
     private static final float RESTITUTION = 0.2f;
-    private static final float MAX_WHEEL_ANGLE = 20.0f;
+    private static final float MAX_WHEEL_ANGLE = 15.0f;
     private static final float WHEEL_TURN_INCREMENT = 1.0f;
 
     private float mCurrentMaxSpeed;
