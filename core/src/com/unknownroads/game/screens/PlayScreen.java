@@ -23,8 +23,6 @@ import com.unknownroads.game.tools.TimeManager;
 import static com.unknownroads.game.Constants.*;
 import static com.unknownroads.game.entities.Car.*;
 
-
-
 public class PlayScreen implements Screen {
 
     private final SpriteBatch mBatch;
@@ -84,7 +82,6 @@ public class PlayScreen implements Screen {
     @Override
     public void show() {
 
-
     }
 
     @Override
@@ -103,7 +100,6 @@ public class PlayScreen implements Screen {
                 break;
         }
 
-
         update(delta);
 
         handleAudio();
@@ -118,47 +114,45 @@ public class PlayScreen implements Screen {
 
     }
 
-
     private void handleAudio() {
-
+        //TODO check no hit edge case
         double angle = mPlayer.getmBody().getAngle();
         Vector2 pos = mPlayer.getmBody().getPosition();
-
-        //TODO mudar origem p nose
         rayOrigin.set( (float) (2.6f * Math.cos(angle+Math.PI/2) + pos.x) , (float) (2.6f * Math.sin(angle+Math.PI/2) + pos.y));
 
-        //TODO mudar para arcos....
-        //Fetches the point RAYLEN to the left and right of rayOrigin, rotated according to 'mPlayer.getAngle()'
-        float leftX = (float) ((-RAY_LENGTH) * Math.cos(angle) + rayOrigin.x);
-        float leftY = (float) ((-RAY_LENGTH) * Math.sin(angle) + rayOrigin.y);
-        float rightX = (float) ((RAY_LENGTH) * Math.cos(angle) + rayOrigin.x);
-        float rightY = (float) ((RAY_LENGTH) * Math.sin(angle) + rayOrigin.y);
-
-        rayLeft.set(leftX, leftY);
-        rayRight.set(rightX, rightY);
-
-        //TODO check renderer options
-        //Draws audio lines
+        int n = 0;
         sr.setProjectionMatrix(mCamera.combined);
         sr.begin(ShapeRenderer.ShapeType.Line);
+        Vector2 prevL = rayOrigin.cpy();
+        Vector2 prevR = rayOrigin.cpy();
+        while(n<8){
 
-        sr.circle(pos.x,pos.y,1); //TODO debug
+            float leftX = (float) ((RAY_LENGTH) * Math.cos(angle+Math.PI-1.22 + ((Math.PI/9)*n)) + prevL.x); //1.22rad = 70º
+            float leftY = (float) ((RAY_LENGTH) * Math.sin(angle+Math.PI-1.22 + ((Math.PI/9)*n)) + prevL.y); //ciclo Math.cos(angle+Math.PI-1.22 - 20(rad)*n)
+            float rightX = (float) ((RAY_LENGTH) * Math.cos(angle+1.22 - ((Math.PI/9)*n)) + prevR.x); //TODO mudar max angle rodas para 15 e angulo aqui p pi/2
+            float rightY = (float) ((RAY_LENGTH) * Math.sin(angle+1.22 - ((Math.PI/9)*n)) + prevR.y);
 
-        sr.line(rayOrigin, rayLeft);
-        sr.line(rayOrigin, rayRight);
+            rayLeft.set(leftX, leftY);
+            rayRight.set(rightX, rightY);
 
+            sr.line(prevL, rayLeft);
+            sr.line(prevR, rayRight);
 
-        mWorld.rayCast(rayLeftCallback,rayOrigin,rayLeft);
-        mWorld.rayCast(rayRightCallback, rayOrigin, rayRight);
+            mWorld.rayCast(rayLeftCallback,prevL,rayLeft);
+            mWorld.rayCast(rayRightCallback, prevR, rayRight);
 
+            prevL = rayLeft.cpy();
+            prevR = rayRight.cpy();
 
-        //TODO check placement of rayCast related code
+            n++;
+
+        }
+
         if(rayLeftCallback.hitPos != null) {
             sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
         }
         if(rayRightCallback.hitPos != null) {
             sr.line(rayRightCallback.hitPos, new Vector2(rayRightCallback.hitNormal).add(rayRightCallback.hitPos));
-            //System.out.println("right: " + rayRightCallback.hitPos.dst(mPlayer.getmBody().getPosition()));
         }
 
         sr.end();
@@ -167,19 +161,12 @@ public class PlayScreen implements Screen {
         if(rayLeftCallback.hitPos != null && rayRightCallback.hitPos != null) {
             float distl = rayLeftCallback.hitPos.dst(mPlayer.getmBody().getPosition());
             float distr = rayRightCallback.hitPos.dst(mPlayer.getmBody().getPosition());
-
-
             panValue = distr/distl - 1; //TODO mudar valores (distl/distr-1) melhorar panValue
-
-
         }
-
 
         float linVelocity = mPlayer.getmBody().linVelLoc.len();
         sound.setPan(soundId, panValue ,(20 + linVelocity)/120); //USE MAXSPEED IN PLAYSCREEN CONSTRUCTOR
         sound.setPitch(soundId, (20 + linVelocity)/60);
-
-        //TODO edge case: both raycasts have no hit
 
     }
 
