@@ -20,8 +20,16 @@ import com.unknownroads.game.tools.MyRayCastCallback;
 import com.unknownroads.game.tools.PlayerContactListener;
 import com.unknownroads.game.tools.TimeManager;
 
-import static com.unknownroads.game.Constants.*;
-import static com.unknownroads.game.entities.Car.*;
+import static com.unknownroads.game.Constants.DEFAULT_ZOOM;
+import static com.unknownroads.game.Constants.GRAVITY;
+import static com.unknownroads.game.Constants.PPM;
+import static com.unknownroads.game.Constants.RAY_LENGTH;
+import static com.unknownroads.game.entities.Car.DRIVE_DIRECTION_BACKWARD;
+import static com.unknownroads.game.entities.Car.DRIVE_DIRECTION_FORWARD;
+import static com.unknownroads.game.entities.Car.DRIVE_DIRECTION_NONE;
+import static com.unknownroads.game.entities.Car.TURN_DIRECTION_LEFT;
+import static com.unknownroads.game.entities.Car.TURN_DIRECTION_NONE;
+import static com.unknownroads.game.entities.Car.TURN_DIRECTION_RIGHT;
 
 public class PlayScreen implements Screen {
 
@@ -49,11 +57,11 @@ public class PlayScreen implements Screen {
 
     private HUD hud;
 
-    public PlayScreen(){
+    public PlayScreen() {
         mBatch = new SpriteBatch();
         mWorld = new World(GRAVITY, true);
         mB2dr = new Box2DDebugRenderer();
-        mCamera= new OrthographicCamera();
+        mCamera = new OrthographicCamera();
         mCamera.zoom = DEFAULT_ZOOM;
         mViewport = new StretchViewport(640 / PPM, 480 / PPM, mCamera);
         mMapLoader = new MapLoader(mWorld);
@@ -70,8 +78,9 @@ public class PlayScreen implements Screen {
         //TODO crossgoal sound
         //TODO short raycast in front to warn of impending walls
         sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
-        soundId = sound.play(0.0f);
-        sound.setLooping(soundId,true);
+        soundId = -1;
+//        soundId = sound.play(0.0f);
+//        sound.setLooping(soundId,true);
 
         tm = new TimeManager();
         mWorld.setContactListener(new PlayerContactListener(tm));
@@ -88,7 +97,11 @@ public class PlayScreen implements Screen {
     @Override
     public void render(float delta) {
 
-        Gdx.gl.glClearColor(0,0,0,1);
+        if (soundId == -1) {
+            soundId = sound.loop(0.0f);
+        }
+
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         //TODO pedreiro codigo repetido
@@ -107,7 +120,7 @@ public class PlayScreen implements Screen {
 
         hud.render();
 
-        if(tm.getLapTime() != -1) {
+        if (tm.getLapTime() != -1) {
             tm.update(delta);
         }
 
@@ -119,7 +132,7 @@ public class PlayScreen implements Screen {
     private void handleAudio() {
         double angle = mPlayer.getmBody().getAngle();
         Vector2 pos = mPlayer.getmBody().getPosition();
-        rayOrigin.set( (float) (2.6f * Math.cos(angle+Math.PI/2) + pos.x) , (float) (2.6f * Math.sin(angle+Math.PI/2) + pos.y));
+        rayOrigin.set((float) (2.6f * Math.cos(angle + Math.PI / 2) + pos.x), (float) (2.6f * Math.sin(angle + Math.PI / 2) + pos.y));
 
         int n = 0;
         float cl = -1;
@@ -128,29 +141,29 @@ public class PlayScreen implements Screen {
         sr.begin(ShapeRenderer.ShapeType.Line);
         Vector2 prevL = rayOrigin.cpy();
         Vector2 prevR = rayOrigin.cpy();
-        while(n<18){
+        while (n < 18) {
 
-            float leftX = (float) ((RAY_LENGTH) * Math.cos(angle+Math.PI-1.30 + ((Math.PI/12)*n)) + prevL.x); //1.30rad = 75º
-            float leftY = (float) ((RAY_LENGTH) * Math.sin(angle+Math.PI-1.30 + ((Math.PI/12)*n)) + prevL.y); //ciclo Math.cos(angle+Math.PI-1.30 + PI/12(rad)*n) 180-75+15*n
-            float rightX = (float) ((RAY_LENGTH) * Math.cos(angle+1.30 - ((Math.PI/12)*n)) + prevR.x);
-            float rightY = (float) ((RAY_LENGTH) * Math.sin(angle+1.30 - ((Math.PI/12)*n)) + prevR.y);
+            float leftX = (float) ((RAY_LENGTH) * Math.cos(angle + Math.PI - 1.30 + ((Math.PI / 12) * n)) + prevL.x); //1.30rad = 75º
+            float leftY = (float) ((RAY_LENGTH) * Math.sin(angle + Math.PI - 1.30 + ((Math.PI / 12) * n)) + prevL.y); //ciclo Math.cos(angle+Math.PI-1.30 + PI/12(rad)*n) 180-75+15*n
+            float rightX = (float) ((RAY_LENGTH) * Math.cos(angle + 1.30 - ((Math.PI / 12) * n)) + prevR.x);
+            float rightY = (float) ((RAY_LENGTH) * Math.sin(angle + 1.30 - ((Math.PI / 12) * n)) + prevR.y);
 
             rayLeft.set(leftX, leftY);
             rayRight.set(rightX, rightY);
 
-            //sr.line(prevL, rayLeft);
-//            sr.line(prevR, rayRight);
+            sr.line(prevL, rayLeft);
+            sr.line(prevR, rayRight);
 
-            mWorld.rayCast(rayLeftCallback,prevL,rayLeft);
+            mWorld.rayCast(rayLeftCallback, prevL, rayLeft);
             mWorld.rayCast(rayRightCallback, prevR, rayRight);
 
-            if(rayLeftCallback.finished() && cl == -1){ //n-1 offset da diagonal do carro á parede
-                cl = (n-1)*RAY_LENGTH + rayLeftCallback.hitPos.dst(prevL);
+            if (rayLeftCallback.finished() && cl == -1) { //n-1 offset da diagonal do carro á parede
+                cl = (n - 1) * RAY_LENGTH + rayLeftCallback.hitPos.dst(prevL);
                 sr.line(rayLeftCallback.hitPos, new Vector2(rayLeftCallback.hitNormal).add(rayLeftCallback.hitPos));
             }
 
-            if(rayRightCallback.finished() && cr == -1){
-                cr = (n-1)*RAY_LENGTH + rayRightCallback.hitPos.dst(prevR);
+            if (rayRightCallback.finished() && cr == -1) {
+                cr = (n - 1) * RAY_LENGTH + rayRightCallback.hitPos.dst(prevR);
                 sr.line(rayRightCallback.hitPos, new Vector2(rayRightCallback.hitNormal).add(rayRightCallback.hitPos));
             }
 
@@ -166,12 +179,13 @@ public class PlayScreen implements Screen {
 
         sr.end();
 
-        float panValue = (-cl/(cl+cr)) + (cr/(cl+cr));
+        float panValue = (-cl / (cl + cr)) + (cr / (cl + cr));
 //        System.out.println("pan: " + panValue);
-        
+
         float linVelocity = mPlayer.getmBody().linVelLoc.len();
-        sound.setPan(soundId, panValue ,(20 + linVelocity)/120); //USE MAXSPEED IN PLAYSCREEN CONSTRUCTOR
-        sound.setPitch(soundId, (20 + linVelocity)/60);
+        sound.setPan(soundId, panValue, (20 + linVelocity) / 120); //USE MAXSPEED IN PLAYSCREEN CONSTRUCTOR
+        sound.setPitch(soundId, 0.5f+(linVelocity)/100);
+
 
     }
 
@@ -204,29 +218,29 @@ public class PlayScreen implements Screen {
         float accelZ = Gdx.input.getAccelerometerZ();
         float accelY = Gdx.input.getAccelerometerY();
 
-        if (accelZ> 6.0f){
+        if (accelZ > 6.0f) {
             mPlayer.setmDriveDirection(DRIVE_DIRECTION_FORWARD);
-        }else if (accelZ< -1.0f){
+        } else if (accelZ < -1.0f) {
             mPlayer.setmDriveDirection(DRIVE_DIRECTION_BACKWARD);
-        }else {
+        } else {
             mPlayer.setmDriveDirection(DRIVE_DIRECTION_NONE);
         }
 
-        if (accelY < -2.0f){
+        if (accelY < -2.0f) {
             mPlayer.setmTurnDirection(TURN_DIRECTION_LEFT);
-        }else if (accelY >  2.0f){
+        } else if (accelY > 2.0f) {
             mPlayer.setmTurnDirection(TURN_DIRECTION_RIGHT);
-        }else {
+        } else {
             mPlayer.setmTurnDirection(TURN_DIRECTION_NONE);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
-    }
+        }
 
     }
 
-    private void draw(){//TODO add sprites
+    private void draw() {//TODO add sprites
         mBatch.setProjectionMatrix(mCamera.combined);
         mB2dr.render(mWorld, mCamera.combined);
     }
