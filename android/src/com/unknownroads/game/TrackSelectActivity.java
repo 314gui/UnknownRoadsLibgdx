@@ -37,7 +37,7 @@ public class TrackSelectActivity extends AppCompatActivity {
         textView.setText(String.valueOf(bestLap));
 
 
-        ImageView clayout = findViewById(R.id.imageView);
+        TextView clayout = findViewById(R.id.textView7);
         clayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
