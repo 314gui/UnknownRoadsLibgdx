@@ -1,5 +1,7 @@
 package com.unknownroads.game.tools;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -21,6 +23,11 @@ public class PlayerContactListener implements ContactListener {
 
         if((nameA == "goal" || nameB =="goal") && (nameA == "player" ||nameB == "player") )
             tm.newLap();
+
+        if((nameA == "wall" || nameB =="wall") && (nameA == "player" ||nameB == "player") ){
+             Gdx.input.vibrate(100);
+        }
+
 
     }
 
