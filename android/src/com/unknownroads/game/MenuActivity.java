@@ -19,7 +19,7 @@ public class MenuActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        LinearLayout leftlayout = (LinearLayout) findViewById(R.id.leftlayout);
+        LinearLayout leftlayout = (LinearLayout) findViewById(R.id.rightlayout2);
         leftlayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
