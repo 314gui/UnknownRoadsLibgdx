@@ -51,6 +51,7 @@ public class PlayScreen implements Screen {
 
     //TODO create audio manager?
     private Sound sound;
+    private Sound objectiveSound;
     private long soundId;
 
     private TimeManager tm;
@@ -77,10 +78,11 @@ public class PlayScreen implements Screen {
         //TODO crossgoal sound (performance?)
         //TODO short raycast in front to warn of impending walls
         sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
+        objectiveSound = Gdx.audio.newSound(Gdx.files.internal("newlap.wav"));
         soundId = -1;
 
         tm = new TimeManager();
-        mWorld.setContactListener(new PlayerContactListener(tm));
+        mWorld.setContactListener(new PlayerContactListener(tm,objectiveSound));
 
         hud = new HUD(tm);
 
@@ -278,7 +280,7 @@ public class PlayScreen implements Screen {
         mMapLoader.dispose();
 
         sr.dispose();
-
+        objectiveSound.dispose();
         sound.dispose();
 
         hud.dispose();
