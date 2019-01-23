@@ -1,8 +1,5 @@
 package com.unknownroads.game.tools;
 
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
 import java.util.ArrayList;
 
 public class TimeManager {
