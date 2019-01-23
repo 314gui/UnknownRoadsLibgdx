@@ -58,13 +58,14 @@ public class HUD implements Disposable {
         else
             font.draw(batch, "Time: --", 3, Gdx.graphics.getHeight() - 3);
 
+        font.draw(batch, "Lap: " + tm.getLap(), 3, Gdx.graphics.getHeight() - 20);
+
+
         if (tm.getBestLap() != -1) {
-            font.draw(batch, "PB: " + tm.getBestLap(), 3, Gdx.graphics.getHeight() - 20);
+            font.draw(batch, "PB: " + tm.getBestLap(), 3, Gdx.graphics.getHeight() - 37);
             prefs.putFloat("bestLap", tm.getBestLap());
             prefs.flush();
-
         }
-
 
         batch.end();
 

@@ -74,13 +74,10 @@ public class PlayScreen implements Screen {
         rayLeftCallback = new MyRayCastCallback();
         rayRightCallback = new MyRayCastCallback();
 
-        //TODO working android sound
-        //TODO crossgoal sound
+        //TODO crossgoal sound (performance?)
         //TODO short raycast in front to warn of impending walls
         sound = Gdx.audio.newSound(Gdx.files.internal("motor.wav"));
         soundId = -1;
-//        soundId = sound.play(0.0f);
-//        sound.setLooping(soundId,true);
 
         tm = new TimeManager();
         mWorld.setContactListener(new PlayerContactListener(tm));
@@ -180,7 +177,7 @@ public class PlayScreen implements Screen {
         sr.end();
 
         float panValue = (-cl / (cl + cr)) + (cr / (cl + cr));
-//        System.out.println("pan: " + panValue);
+        System.out.println("pan: " + panValue);
 
         float linVelocity = mPlayer.getmBody().linVelLoc.len();
         sound.setPan(soundId, panValue, (20 + linVelocity) / 120); //USE MAXSPEED IN PLAYSCREEN CONSTRUCTOR

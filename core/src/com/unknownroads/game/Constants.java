@@ -11,7 +11,7 @@ public class Constants {
     public static final float PPM = 50.0f;
     public static final int RAY_LENGTH = 4;
 
-    public static final String MAP_NAME = "map_goal.tmx";
+    public static final String MAP_NAME = "tutorial.tmx";
 
 
 
